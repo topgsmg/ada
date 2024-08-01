@@ -1,266 +1,200 @@
-4.......
-#include<stdio.h>
-int main ()
-{
-int n,a[20][20],i,j,min,u,v,s[10],d[10],k;
-printf ("Enter the number of vertices\n");
-scanf("%d",&n);
-printf ("Enter adjacency matrix\n");
-for(i=1;i<=n;i++)
-{
-for(j=1;j<=n;j++)
-{
-scanf("%d",&a[i][j]);
-}
-}
-printf("Enter source vertex\n");
-scanf("%d",&v);
-for(i=1;i<=n;i++)
-{
-s[i]=0;
-d[i]=a[v][i];
-}
-d[v]=0;
-s[v]=1;
-for(k=2;k<=n;k++)
-{
-min=999;
-for(i=1;i<=n;i++)
-{
-if(d[i]<min && s[i]==0)
-{
-min=d[i];
-u=i;
-}
-}
-s[u]=1;
-for(i=1;i<=n;i++)
-{
-if(s[i]==0)
-{
-if(d[i]>d[u]+a[u][i])
-{
-d[i]=d[u]+a[u][i];
-}
-}
-}
-}
-for(i=1;i<=n;i++)
-{
-printf("%d---->%d=%d\n",v,i,d[i]);
-}
-}
 
-
-5.........
+6......
 #include<stdio.h>
-void ts(int a[20][20], int n)
+int w[10],p[10],n;
+int max(int a,int b)
 {
-int t[10],vis[10],stack[10],i,j,indeg[10],top=0,ele,k=1;
-for(i=1;i<=n;i++)
-{
-t[i]=0;
-vis[i]=0;
-indeg[i]=0;
+return a>b?a:b;
 }
-for(i=1;i<=n;i++)
+int knap(int i,int m)
 {
-for(j=1;j<=n;j++)
-{
-if(a[i][j]==1)
-{
-indeg[j]=indeg[j]+1;
-}
-}
-}
-printf("Indegree Array:");
-for(i=1;i<=n;i++)
-printf("%d ",indeg[i]);
-for(i=1;i<=n;i++)
-{
-if(indeg[i]==0)
-{
-stack[++top]=i;
-vis[i]=1;
-}
-}
-while(top>0)
-{
-ele=stack[top--];
-t[k++]=ele;
-for(j=1;j<=n;j++)
-{
-if(a[ele][j]==1 && vis[j]==0)
-{
-indeg[j]=indeg[j]-1;
-if(indeg[j]==0)
-{
-stack[++top]=j;
-vis[j]=1;
-}
-}
-}
-}
-printf("\nTopological Ordering is:");
-for(i=1;i<=n;i++)
-printf("%d",t[i]);
+if(i==n) return w[i]>m?0:p[i];
+if(w[i]>m) return knap(i+1,m);
+return max(knap(i+1,m),knap(i+1,m-w[i])+p[i]);
 }
 int main()
 {
-int n,a[20][20],i,j;
-printf("Enter the number of nodes\n");
+int m,i,max_profit;
+printf("\nEnter the no. of objects:");
 scanf("%d",&n);
-printf("Enter Adjacency matric\n");
+printf("\nEnter the knapsack capacity:");
+scanf("%d",&m);
+printf("\nEnter profit followed by weight:\n");
 for(i=1;i<=n;i++)
-{
-for(j=1;j<=n;j++)
-{
-scanf("%d",&a[i][j]);
-}
-}
-ts(a,n);
+scanf("%d %d",&p[i],&w[i]);
+max_profit=knap(1,m);
+printf("\nMax profit=%d",max_profit);
+return 0;
 }
 
 
+7.....
+#include <stdio.h>
+#define MAX 50
+int p[MAX], w[MAX], x[MAX];
+double maxprofit;
+int n, m, i;
+void greedyKnapsack(int n, int w[], int p[], int m) {
+ double ratio[MAX];
 
-10.......
-
-#include<stdio.h>
-#include<time.h>
-#include<stdlib.h>
-void quicksort(int a[],int low,int high);
-int partition(int a[],int low,int high);
-void swap(int*,int*);
-void quicksort(int a[],int low,int high)
-{
-if(low<high)
-{
-int pi = partition(a,low,high);
-quicksort(a,low,pi-1);
-quicksort(a,pi+1,high);
-}
-}
-void swap(int *a,int *b)
-{
-int c=*a;
-*a=*b;
-*b=c;
-}
-int partition(int a[],int low,int high)
-{
-int pivot=a[high];
-int i=low-1;
-for(int j=low;j<=high-1;j++)
-{
-if(a[j]<=pivot)
-{
-i++;
-swap(&a[i],&a[j]);
-}
-}
-swap(&a[i+1],&a[high]); return (i+1);
-}
-void main()
-{
-srand(time(NULL));
-int a[100000],n=100000;
-int elements[n];
-for(int i=0;i<n;i++)
- {
- elements[i]=rand()%1000;
+ // Calculate the ratio of profit to weight for each item
+ for (i = 0; i < n; i++) {
+ ratio[i] = (double)p[i] / w[i];
  }
- for(int size=5000;size<=n;size+=2000)
-{
-int arr[size];
-for(int i=0;i<size;i++)
-{
-arr[i]=elements[i];
+ // Sort items based on the ratio in non-increasing order
+ for (i = 0; i < n - 1; i++) {
+ for (int j = i + 1; j < n; j++) {
+ if (ratio[i] < ratio[j]) {
+ double temp = ratio[i];
+ ratio[i] = ratio[j];
+ ratio[j] = temp;
+
+ int temp2 = w[i];
+ w[i] = w[j];
+ w[j] = temp2;
+
+ temp2 = p[i];
+ p[i] = p[j];
+ p[j] = temp2;
+ }
+ }
+ }
+ int currentWeight = 0;
+ maxprofit = 0.0;
+ for (i = 0; i < n; i++) {
+ if (currentWeight + w[i] <= m) {
+ x[i] = 1; // Item i is selected
+ currentWeight += w[i];
+ maxprofit += p[i];
+ } else {
+ // Fractional part of item i is selected
+ x[i] = (m - currentWeight) / (double)w[i];
+ maxprofit += x[i] * p[i];
+ break;
+ }
+ }
+ printf("Optimal solution for greedy method: %.1f\n", maxprofit);
+ printf("Solution vector for greedy method: ");
+ for (i = 0; i < n; i++)
+ printf("%d\t", x[i]);
 }
-clock_t start=clock();
-quicksort(a,0,size);
-clock_t end=clock();
-printf("Total time taken to sort %d elements is %lf\n",size,((double)(end-start)/CLOCKS_PER_SEC));
-}
+int main() {
+ printf("Enter the number of objects: ");
+ scanf("%d", &n);
+ printf("Enter the objects' weights: ");
+ for (i = 0; i < n; i++)
+ scanf("%d", &w[i]);
+ printf("Enter the objects' profits: ");
+ for (i = 0; i < n; i++)
+ scanf("%d", &p[i]);
+ printf("Enter the maximum capacity: ");
+ scanf("%d", &m);
+ greedyKnapsack(n, w, p, m);
+ return 0;
 }
 
-11.........
-#include<stdlib.h>
+
+
+8......
 #include<stdio.h>
-#include<time.h>
-void merge(int arr[], int l, int m, int r)
+// #include<conio.h>
+#define MAX 10
+int s[MAX],x[MAX],d;
+void sumofsub(int p,int k,int r)
 {
-int i, j, k;
-int n1 = m - l + 1;
-int n2 = r - m;
-// Create temp arrays
-int L[n1], R[n2];
-// Copy data to temp array
-for (i = 0; i < n1; i++)
-L[i] = arr[l + i];
-for (j = 0; j < n2; j++)
-R[j] = arr[m + 1+ j];
-// Merge the temp arrays
-i = 0;
-j = 0;
-k = l;
-while (i < n1 && j < n2)
+int i;
+x[k]=1;
+if((p+s[k])==d)
 {
-if (L[i] <= R[j])
-{
-arr[k] = L[i];
-i++;
+for(i=1;i<=k;i++)
+if(x[i]==1)
+printf("%d ",s[i]);
+printf("\n");
 }
 else
+if(p+s[k]+s[k+1]<=d)
+sumofsub(p+s[k],k+1,r-s[k]);
+if((p+r-s[k]>=d) && (p+s[k+1]<=d))
 {
-arr[k] = R[j];
-j++;
+x[k]=0;
+sumofsub(p,k+1,r-s[k]);
 }
-k++;
 }
-// Copy the remaining elements of L[]
-while (i < n1)
+int main()
 {
-arr[k] = L[i];
-i++;
-k++;
+int i,n,sum=0;
+printf("\nEnter the n value:");
+scanf("%d",&n);
+printf("\nEnter the set in increasing order:");
+for(i=1;i<=n;i++)
+scanf("%d",&s[i]);
+printf("\nEnter the max subset value:");
+scanf("%d",&d);
+for(i=1;i<=n;i++)
+sum=sum+s[i];
+if(sum<d || s[1]>d)
+printf("\nNo subset possible");
+else
+sumofsub(0,1,sum);
+return 0;
 }
-// Copy the remaining elements of R[]
-while (j < n2)
+
+
+
+12......
+#include<stdio.h>
+#include<stdlib.h>
+int board[20], count;
+void print(int n)
 {
-arr[k] = R[j];
-j++;
-k++;
-}
-}
-void mergeSort(int arr[], int l, int r)
+int i, j;
+printf("\n\nSolution %d:\n\n",++count);
+for(i=1;i<=n;i++)
+printf("\t%d",i);
+for(i=1;i<=n;i++)
 {
-if (l < r)
+printf("\n\n%d",i);
+for(j=1;j<=n;j++)
 {
-// Finding mid element
-int m = l+(r-l)/2;
-// Recursively sorting both the halves
-mergeSort(arr, l, m);
-mergeSort(arr, m+1, r);
-merge(arr, l, m, r);
+if(board[i]==j)
+printf("\tQ");
+else
+printf("\t-");
 }
 }
-void main()
+}
+int place(int row,int column)
 {
-srand(time(NULL));
-int arr[100000],n=100000,i,size;
-int elements[n];
-for(i=0;i<n;i++)
-elements[i]=rand()%1000;
-for(size=5000;size<n;size+=5000)
+int i;
+for(i=1;i<=row-1;i++)
 {
-arr[size];
-for(i=0;i<n;i++)
+if(board[i]==column)
+return 0;
+else if(abs(board[i]-column)==abs(i-row))
+return 0;
+}
+return 1;
+}
+void queen(int row,int n)
 {
-arr[i]=elements[i];
+int column;
+for(column=1;column<=n;column++)
+{
+if(place(row,column))
+{
+board[row]=column;
+if(row==n)
+print(n);
+else
+queen(row+1,n);
 }
-clock_t start=clock();
-mergeSort(arr, 0,size);
-clock_t end=clock();
-printf("Total time taken to sort %d elements is %lf\n",size,((double)(endstart)/CLOCKS_PER_SEC));
 }
 }
+int main()
+{
+int n;
+printf("Enter number of Queens:");
+scanf("%d",&n);
+queen(1,n);
+}
+
